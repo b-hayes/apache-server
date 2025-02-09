@@ -2,8 +2,6 @@
 
 My notes on running an apache server in Ubuntu.
 
-There are several advantages for using a nativily installed apache instead of a docker container.
-
 ## Installation.
 
 ```shell
@@ -30,47 +28,26 @@ Use this to check for error messages when something doesnt go right.
 sudo tail -f /var/log/apache2/error.log
 ```
 
-## Permissions
+## Folder Permissions
 
-Apache needs full access to all parent folders leading yo your intended document root or it will error. 
-
-If you want apache to use projects your working on from your home directory without handing out
-too many permisisons create a symbolic link instea.
-
-```shell
-sudo ln -s ~/websites /var/www/html # try to use fully qualified paths in all links.
-ls -al /var/www/html #should now show your websites folder
-```
-Your project folders will now appear inside the apache html folder that is already owned by 
-
-## Setting permissions.
-
-Good practice is to use 755.
-
-755 give the owner read write and execute, groups get read and execute,
- and others (like apache) get read and execute.
-```shell
-chmod -R 755 ~/websites
-```
-ALl files created afterwards should inherit the permissions and apache should be fine to read them.
-Only give write access to sepcific folders when you actually need it.
+Its best to just create projects inside the /var/www/html folder. Its too finicky otherwise.
 
 ## Setting up vhosts.
 
-In ubuntu the typical appraoch is to use a symbolic link to config files in the
-`sites-enabled` folder.
+Use a symbolic link to place config files in the `sites-enabled` folder.
+The configs are lot more forgiving with permission it only needs read access.
 
 ```shell
 ls -al /etc/apache2/sites-enabled/
 ```
 
-### Unlink vhost.
+### Unlink vhost config.
 By default there will be a link to 000-default.conf lets remove it...
 ```shell
 sudo unlink /etc/apache2/sites-enabled/000-default.conf
 ```
 
-### Link new vhost.
+### Link new vhost config.
 
 Lets link the [dynamic localhost](dynamic-localhost.conf) config I have provided...
 
@@ -89,10 +66,12 @@ sudo service apache2 restart
 ```
 
 ## Dynamic Localhost
-If you used my provided dynamic localhot config you can now access sub folders via a
-sub domain.
+The dynamic localhost config will point sub domains to sub folders.
 
-EXAMPLE: hello-world.localhost will open websites/hello-world
+localhost still points to /var/www/html but now
+animals.localhost will open website in /var/www/html/animals
+It goes 2 levels deep eg: dogs.animals.localhost will open websites/animals/dogs
 
-It goes 2 levels deep.
-EXAMPLE: project.cate.localhost will open websites/world/hello
+So you can practice having mutiple domains with sub domains all living unther the master domain of localhost.
+
+This can easily transfer to a self hosted setup with real domains later.

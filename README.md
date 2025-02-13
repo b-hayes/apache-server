@@ -22,7 +22,7 @@ xdg-open http://localhost/phpinfo.php
 
 ## Checking for errors.
 
-Use this to check for error messages when something doesnt go right.
+Use this to check for error messages when something doesn'St go right.
 
 ```shell
 sudo tail -f /var/log/apache2/error.log

@@ -52,7 +52,7 @@ sudo unlink /etc/apache2/sites-enabled/000-default.conf
 Lets link the [dynamic localhost](dynamic-localhost.conf) config I have provided...
 
 ```shell
-# do not use reletive paths when linking files. Thats why I add pwd insead of ./
+# do not use relative paths when linking files. That's why I add pwd insead of ./
 sudo ln -s $(pwd)/dynamic-localhost.conf /etc/apache2/sites-enabled
 sudo cat /etc/apache2/sites-enabled # make sure the link worked.
 ```
@@ -66,12 +66,10 @@ sudo service apache2 restart
 ```
 
 ## Dynamic Localhost
-The dynamic localhost config will point sub domains to sub folders.
+The dynamic localhost config will point sub-domains to sub folders.
+Up to two level deep eg:
+- localhost points to /var/www/html
+- animals.localhost points to /var/www/html/animals
+- dogs.animals.localhost points to websites/animals/dogs
 
-localhost still points to /var/www/html but now
-animals.localhost will open website in /var/www/html/animals
-It goes 2 levels deep eg: dogs.animals.localhost will open websites/animals/dogs
-
-So you can practice having mutiple domains with sub domains all living unther the master domain of localhost.
-
-This can easily transfer to a self hosted setup with real domains later.
+So you can have all your projects share the same native instance of apache/php/mysql etc.

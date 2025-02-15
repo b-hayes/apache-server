@@ -49,10 +49,10 @@ sudo unlink /etc/apache2/sites-enabled/000-default.conf
 
 ### Link new vhost config.
 
-Lets link the [dynamic localhost](dynamic-localhost.conf) config I have provided...
+Use my [dynamic localhost](dynamic-localhost.conf) config if you don't have your own yet.
 
 ```shell
-# do not use relative paths when linking files. That's why I add pwd insead of ./
+# do not use relative paths when linking files. That's why I use $(pwd) instead of ./
 sudo ln -s $(pwd)/dynamic-localhost.conf /etc/apache2/sites-enabled
 sudo cat /etc/apache2/sites-enabled # make sure the link worked.
 ```
@@ -65,11 +65,30 @@ Enable the new config by restarting. Need to do this evey time you change stuff.
 sudo service apache2 restart
 ```
 
-## Dynamic Localhost
-The dynamic localhost config will point sub-domains to sub folders.
+## The Dynamic Localhost config.
+The dynamic localhost config will point subdomains to sub folders.
 Up to two level deep eg:
 - localhost points to /var/www/html
 - animals.localhost points to /var/www/html/animals
 - dogs.animals.localhost points to websites/animals/dogs
 
 So you can have all your projects share the same native instance of apache/php/mysql etc.
+No need to.
+
+Remember that all these folders are also accessible via localhost/paths.
+EG: cats.localhost ==  localhost/cats
+So you will want to add a htaccess file preventing direct folder access if you only want it accessed by subdomain.
+
+## Exposing to the public?
+
+Rather than .localhost being last .com or .net will be so the folder will match the main domain name.
+
+- animals.com points to /var/www/html/animals
+- cat.animals.com points to /var/www/html/animals/cats
+
+The beauty of this is your public site eg animals.com is also accessed via animals.localhost allowing you
+to debug your production version with some special flags enabled for localhost only.
+
+However, .com.au or alike and www. will throw a spanner in the works and you will need to make rules for those cases.
+
+

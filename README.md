@@ -30,6 +30,7 @@ sudo tail -f /var/log/apache2/error.log
 
 ## Folder Permissions
 By default, the www folder is owned by root, lets change it to you and www-data group.
+We are using the /var/www/html folder mostly but best ot do it for the /var/www folder as well.
 
 Use my script:
 ```shell

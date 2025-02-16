@@ -29,8 +29,14 @@ sudo tail -f /var/log/apache2/error.log
 ```
 
 ## Folder Permissions
+By default, the www folder is owned by root, lets change it to you and www-data group.
 
-Its best to just create projects inside the /var/www/html folder. Its too finicky otherwise.
+Use my script:
+```shell
+./fix-permissions.sh
+```
+This should set all the bitmask flags so that any new files created by either oyu or apache should be
+fully accessible by both of you.
 
 ## Setting up vhosts.
 
@@ -54,7 +60,10 @@ Use my [dynamic localhost](dynamic-localhost.conf) config if you don't have your
 ```shell
 # do not use relative paths when linking files. That's why I use $(pwd) instead of ./
 sudo ln -s $(pwd)/dynamic-localhost.conf /etc/apache2/sites-enabled
-sudo cat /etc/apache2/sites-enabled # make sure the link worked.
+```
+Verify the contents of the file are there via the new link.
+```shell
+sudo cat /etc/apache2/sites-enabled/dynamic-localhost.conf
 ```
 
 ### Restart apache

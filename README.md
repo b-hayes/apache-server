@@ -10,6 +10,10 @@ sudo apt upgrade
 sudo apt install apache2
 sudo apt install php
 sudo a2enmod rewrite
+```
+
+Restart apache:
+```shell
 sudo service apache2 restart
 ```
 

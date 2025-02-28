@@ -22,7 +22,7 @@ xdg-open http://localhost/phpinfo.php
 
 ## Checking for errors.
 
-Use this to check for error messages when something doesn'St go right.
+Use this to check for error messages.
 
 ```shell
 sudo tail -f /var/log/apache2/error.log
@@ -36,7 +36,7 @@ Use my script:
 ```shell
 ./fix-permissions.sh
 ```
-This should set all the bitmask flags so that any new files created by either oyu or apache should be
+This should set all the bitmask flags so that any new files created by either you or apache should be
 fully accessible by both of you.
 
 ## Setting up vhosts.
@@ -49,7 +49,7 @@ ls -al /etc/apache2/sites-enabled/
 ```
 
 ### Unlink vhost config.
-By default there will be a link to 000-default.conf lets remove it...
+Initially, there will be a link to 000-default.conf lets remove it...
 ```shell
 sudo unlink /etc/apache2/sites-enabled/000-default.conf
 ```

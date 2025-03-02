@@ -1,0 +1,9 @@
+services:
+  web:
+    container_name: apachePHP
+    build: .
+    ports:
+      - "83:80"
+    volumes:
+      - ./html:/var/www/html
+      - ./vhosts.conf:/etc/apache2/sites-available/000-default.conf

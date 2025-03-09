@@ -1,0 +1,14 @@
+{
+    "name": "b-hayes/apache-server",
+    "autoload": {
+        "psr-4": {
+            "BHayes\\ApacheServer\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "b-hayes"
+        }
+    ],
+    "require": {}
+}

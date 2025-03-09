@@ -7,3 +7,5 @@ services:
     volumes:
       - ./html:/var/www/html
       - ./vhosts.conf:/etc/apache2/sites-available/000-default.conf
+      - /var/run/docker.sock:/var/run/docker.sock # allows docker command from Apache to access docker on the host.
+    user: www-data

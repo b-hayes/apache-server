@@ -106,3 +106,11 @@ to debug your production version with some special flags enabled for localhost o
 However, .com.au or alike and www. will throw a spanner in the works and you will need to make rules for those cases.
 
 
+## Changing the default port.
+You may decide to use a proxy manager in front of your web services and thus
+need to change the port for apache.
+
+```shell
+sudo nano /etc/apache2/ports.conf
+```
+Change the listen ports to something that won't clash with common ports for other systems.

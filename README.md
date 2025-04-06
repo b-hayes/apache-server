@@ -95,7 +95,7 @@ So you will want to add a htaccess file preventing direct folder access if you o
 
 ## Exposing to the public?
 
-Rather than .localhost being last .com or .net will be so the folder will match the main domain name.
+Rather than .localhost being last .com or .net will be so the folder will still match the main domain name.
 
 - animals.com points to /var/www/html/animals
 - cat.animals.com points to /var/www/html/animals/cats

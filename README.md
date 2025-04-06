@@ -2,6 +2,8 @@
 
 My notes on running a native apache server in Ubuntu.
 
+**NOTE:** all commands assume you will be running them from inside this repositories root folder.
+
 If all your websites can use the same version of php and mysql I find it easier to just use a single
 instance of those services instead of spinning up multiple docker containers.
 
@@ -18,8 +20,19 @@ It can also be a great setup for production preventing you form needing to creat
 sudo apt update
 sudo apt upgrade
 sudo apt install apache2
-sudo apt install php
+
+# install php and php mod for apache
+sudo apt install php8.3 libapache2-mod-php8.3
+# install common php extensions.
+sudo apt install php8.3-{cgi,mysql,curl,xsl,gd,common,xml,zip,xsl,soap,bcmath,mbstring,gettext,imagick}
+sudo a2enmod php8.3
+
 sudo a2enmod rewrite # enable htaccess rewrite module
+```
+
+If using a proxy manager change the port the server listens to:
+```shell
+nano /etc/apache2/ports.conf
 ```
 
 Restart apache:
@@ -27,19 +40,22 @@ Restart apache:
 sudo service apache2 restart
 ```
 
-Check if php is working:
+Check if you see the default web page: http://localhost
 
+Check if php is working:
 ```shell
 echo "<?php phpinfo(); ?>" | sudo tee /var/www/html/phpinfo.php
 xdg-open http://localhost/phpinfo.php
 ```
 
-If php is working and you see the php info page best to delete this file if your setting up a production server.
+If php is not working check out this debug session[duck.ai_2025-04-06_23-58-47.txt](duck.ai_2025-04-06_23-58-47.txt) I had with an AI.
+
+If php is working, and you see the php info page best to delete this file if your setting up a production server.
 ```shell
 sudo rm /var/www/html/phpinfo.php
 ```
 
-## Checking for errors.
+## Checking for Apache errors.
 
 Use this to check for error messages.
 
@@ -53,12 +69,18 @@ We are using the /var/www/html folder now but best to do it for the entire /var/
 
 Use my fix permissions script:
 ```shell
-./fix-permissions.sh
+./fix-permissions.sh # by default will apply to /var/www
 ```
+
 This should set all the bitmask flags so that any new files created by either you or apache should be
 fully accessible by both of you.
 
-Many of the commands I have later in this readme rely on the bitmasks to be set this way.
+It's a good idea to give apache access to this repo folder as well:
+```shell
+./fix-permissions.sh $(pwd)
+```
+
+Some commands I have later in this readme may need the bitmasks to be set this way.
 
 ## Remove the default page.
 Right now the default page is exposing sensitive information and should be removed from production servers.
@@ -112,6 +134,7 @@ Use my [dynamic localhost](dynamic-localhost.conf) config to start with. This on
 # do not use relative paths when linking files. That's why I use $(pwd) instead of ./
 sudo ln -s $(pwd)/dynamic-localhost.conf /etc/apache2/sites-enabled
 ```
+
 Verify the contents of the file are there via the new link.
 ```shell
 sudo cat /etc/apache2/sites-enabled/dynamic-localhost.conf

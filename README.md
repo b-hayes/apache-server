@@ -2,17 +2,15 @@
 
 My notes on running a native apache server in Ubuntu.
 
-**NOTE:** all commands assume you will be running them from inside this repositories root folder.
+I use the same version of php and mysql for most apps and find it easier to just use a single
+instance of those services instead of creating multiple docker containers.
 
-If all your websites can use the same version of php and mysql I find it easier to just use a single
-instance of those services instead of spinning up multiple docker containers.
+Using a single vhost with htaccess rules to direct each website to a separate folder.
+If the folder exists, the website is enabled, simple as that.
 
-You can use a single vhost with htaccess rules to direct each website and subdomain of to a separate folder.
+For local development you can just use sub domains of localhost as long as you use cloudflaire dns on your machine.
 
-This is mainly great for development testing on localhost as all project folders can be accessed,
-via a subdomain.
-
-It can also be a great setup for production preventing you form needing to create a vhosts config for every website.
+It can also be a great setup for production, preventing you from needing to create a vhosts config for every website.
 
 ## Installing Apache 2.
 
@@ -30,11 +28,6 @@ sudo a2enmod php8.3
 sudo a2enmod rewrite # enable htaccess rewrite module
 ```
 
-If using a proxy manager change the port the server listens to:
-```shell
-nano /etc/apache2/ports.conf
-```
-
 Restart apache:
 ```shell
 sudo service apache2 restart
@@ -48,7 +41,7 @@ echo "<?php phpinfo(); ?>" | sudo tee /var/www/html/phpinfo.php
 xdg-open http://localhost/phpinfo.php
 ```
 
-If php is not working check out this debug session[duck.ai_2025-04-06_23-58-47.txt](duck.ai_2025-04-06_23-58-47.txt) I had with an AI.
+If php is not working, check out this debug session[duck.ai_2025-04-06_23-58-47.txt](duck.ai_2025-04-06_23-58-47.txt) I had with an AI.
 
 If php is working, and you see the php info page best to delete this file if your setting up a production server.
 ```shell
@@ -65,14 +58,15 @@ sudo tail -f /var/log/apache2/error.log
 
 ## Folder Permissions
 By default, the www folder is owned by root, lets change it to you and www-data group.
-We are using the /var/www/html folder now but best to do it for the entire /var/www folder as well.
+We are using the /var/www/html folder right now, but my vhosts config uses the www folder
+as the main document root.
 
 Use my fix permissions script:
 ```shell
 ./fix-permissions.sh # by default will apply to /var/www
 ```
 
-This should set all the bitmask flags so that any new files created by either you or apache should be
+This should set all the bitmask flags so that any new files created by you or apache should be
 fully accessible by both of you.
 
 It's a good idea to give apache access to this repo folder as well:
@@ -85,9 +79,9 @@ Some commands I have later in this readme may need the bitmasks to be set this w
 ## Remove the default page.
 Right now the default page is exposing sensitive information and should be removed from production servers.
 
-Even if you remove the default site config the default page will still be shown if something goes wrong.
+Even if you remove the default site config, the default page will still be shown if something goes wrong.
 
-You can test this theory by removing the default site, and refreshing tha page.
+You can test this theory by removing the default site and refreshing the page.
 
 The sites enabled folder contains symbolic links to config files that enable each website.
 You could just `sudo unlink /etc/apache2/sites-enabled/000-default.conf` or you can use the helper command
@@ -96,6 +90,7 @@ You could just `sudo unlink /etc/apache2/sites-enabled/000-default.conf` or you 
 ```shell
 sudo a2dissite 000-default.conf
 ```
+Either way is fine.
 
 Now restart apache again:
 ```shell
@@ -107,7 +102,7 @@ Now refresh http://localhost and you will still see the default page!
 There are other deeper configs still pointing to that /var/www/html folder as the document root even with the
 default vhost config disabled. We could edit core configs but I prefer to just get rid of the html file.
 
-Lets just move it so you can still read it later if you want, it does have some interesting info.
+Let's just move it so you can still read it later if you want, it does have some interesting info.
 ```shell
 mv /var/www/html/index.html ~/ubuntu-default-page.html
 ```
@@ -124,58 +119,39 @@ cp maintenance.php /var/www/html/index.php
 Normally you would create your vhosts configs in `/etc/apache2/sites-available/` and then use the `a2ensite` command
 to create symlinks to the sites-enabled folder when ready.
 
-But were just going to manually link configs from this repo.
+But were just going to link my provided config from this repo and restart apache.
 
 ### Adding vhost config from this repo.
 
-Use my [dynamic localhost](dynamic-localhost.conf) config to start with. This one is manly designed for dev testing.
+Use my [dynamic localhost](dynamic-vhost.conf) config:
 
 ```shell
 # do not use relative paths when linking files. That's why I use $(pwd) instead of ./
-sudo ln -s $(pwd)/dynamic-localhost.conf /etc/apache2/sites-enabled
+sudo ln -s $(pwd)/dynamic-vhost.conf /etc/apache2/sites-enabled
 ```
 
 Verify the contents of the file are there via the new link.
 ```shell
-sudo cat /etc/apache2/sites-enabled/dynamic-localhost.conf
+sudo cat /etc/apache2/sites-enabled/dynamic-vhost.conf
 ```
 
 ### Restart apache
 
-Enable the new config by restarting. Need to do this evey time you change stuff.
+Enable the new config by restarting. Need to do this every time you change stuff.
 
 ```SHELL
 sudo service apache2 restart
 ```
 
-## The Dynamic Localhost config.
-The dynamic localhost config will point subdomains to sub folders 
-so you dont have to make a vhost for every app you are working on.
+## The Dynamic vhost config.
+The dynamic localhost config will point any domain to a matching folder, ignoring www.
 
-It maps up to two subdomains deep:
-- localhost points to /var/www/html
-- animals.localhost points to /var/www/html/animals
-- dogs.animals.localhost points to websites/animals/dogs
+- localhost points to /var/www/localhost/
+- www.localhost points to /var/www/localhost/
+- animals.localhost points to /var/www/animals.localhost/
+- some.really.long.domain.gov.edu.au to /var/www/some.really.long.domain.gov.edu.au/
 
-So you can have all your projects share the same native instance of apache/php/mysql etc.
-No need to.
-
-Remember that all these folders are also accessible via localhost/paths.
-EG: cats.localhost ==  localhost/cats
-So you will want to add a htaccess file preventing direct folder access if you only want it accessed by subdomain.
-
-## Exposing to the public?
-
-Rather than .localhost being last .com or .net will be so the folder will still match the main domain name.
-
-- animals.com points to /var/www/html/animals
-- cat.animals.com points to /var/www/html/animals/cats
-
-The beauty of this is your public site eg animals.com is also accessed via animals.localhost allowing you
-to debug your production version with some special flags enabled for localhost only.
-
-However, .com.au or alike and www. will throw a spanner in the works and you will need to make rules for those cases.
-
+Super simple.
 
 ## Changing the default port.
 You may decide to use a proxy manager in front of your web services and thus

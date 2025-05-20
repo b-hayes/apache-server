@@ -1,16 +1,16 @@
-# apache-server
+# Apache-server
 
-My notes on running a native apache server in Ubuntu.
+My notes on running a native Apache server in Ubuntu.
 
-I use the same version of php and mysql for most apps and find it easier to just use a single
+I use the same version of PHP and MySQL for most apps and find it easier to just use a single
 instance of those services instead of creating multiple docker containers.
 
-Using a single vhost with htaccess rules to direct each website to a separate folder.
+Using a single Virtual Host with ht access rules to direct each website to a separate folder.
 If the folder exists, the website is enabled, simple as that.
 
-For local development you can just use sub domains of localhost as long as you use cloudflaire dns on your machine.
+For local development you can just use subdomains of localhost as long as you use Cloudflare DNS on your machine.
 
-It can also be a great setup for production, preventing you from needing to create a vhosts config for every website.
+It can also be a great setup for production, preventing you from needing to create a Virtual Host config for every website.
 
 ## Installing Apache 2.
 
@@ -28,22 +28,22 @@ sudo a2enmod php8.3
 sudo a2enmod rewrite # enable htaccess rewrite module
 ```
 
-Restart apache:
+Restart Apache:
 ```shell
 sudo service apache2 restart
 ```
 
 Check if you see the default web page: http://localhost
 
-Check if php is working:
+Check if PHP is working:
 ```shell
 echo "<?php phpinfo(); ?>" | sudo tee /var/www/html/phpinfo.php
 xdg-open http://localhost/phpinfo.php
 ```
 
-If php is not working, check out this debug session[duck.ai_2025-04-06_23-58-47.txt](duck.ai_2025-04-06_23-58-47.txt) I had with an AI.
+If PHP is not working, check out this debug session[duck.ai_2025-04-06_23-58-47.txt](duck.ai_2025-04-06_23-58-47.txt) I had with an AI.
 
-If php is working, and you see the php info page best to delete this file if your setting up a production server.
+If PHP is working, and you see the PHP info page best to delete this file if your setting up a production server.
 ```shell
 sudo rm /var/www/html/phpinfo.php
 ```
@@ -57,8 +57,8 @@ sudo tail -f /var/log/apache2/error.log
 ```
 
 ## Folder Permissions
-By default, the www folder is owned by root, lets change it to you and www-data group.
-We are using the /var/www/html folder right now, but my vhosts config uses the www folder
+By default, the `www` folder is owned by root, let's change it to you and `www-data` group.
+We are using the `/var/www/html` folder right now, but my config uses the `www` folder
 as the main document root.
 
 Use my fix permissions script:
@@ -66,15 +66,15 @@ Use my fix permissions script:
 ./fix-permissions.sh # by default will apply to /var/www
 ```
 
-This should set all the bitmask flags so that any new files created by you or apache should be
+This should set all the bit mask flags so that any new files created by you or Apache should be
 fully accessible by both of you.
 
-It's a good idea to give apache access to this repo folder as well:
+It's a good idea to give Apache access to this repo folder as well:
 ```shell
 ./fix-permissions.sh $(pwd)
 ```
 
-Some commands I have later in this readme may need the bitmasks to be set this way.
+Some commands I have later in this README may need the bit masks to be set this way.
 
 ## Remove the default page.
 Right now the default page is exposing sensitive information and should be removed from production servers.
@@ -92,36 +92,36 @@ sudo a2dissite 000-default.conf
 ```
 Either way is fine.
 
-Now restart apache again:
+Now restart Apache again:
 ```shell
 sudo service apache2 restart
 ```
 
-Now refresh http://localhost and you will still see the default page!
+Now refresh http://localhost, and you will still see the default page!
 
-There are other deeper configs still pointing to that /var/www/html folder as the document root even with the
-default vhost config disabled. We could edit core configs but I prefer to just get rid of the html file.
+There are other deeper configs still pointing to that `/var/www/html` folder as the document root even with the
+default config disabled. We could edit core configs, but I prefer to just get rid of the HTML file.
 
-Let's just move it so you can still read it later if you want, it does have some interesting info.
+Let's just move it, so you can still read it later if you want, it does have some interesting info.
 ```shell
 mv /var/www/html/index.html ~/ubuntu-default-page.html
 ```
 
-And then add some generic maintenance message jic something goes wrong and the default folder is served again.
+And then add some generic maintenance message JIC something goes wrong and the default folder is served again.
 
 For now just copy the example:
 ```shell
 cp maintenance.php /var/www/html/index.php
 ```
 
-## Setting up vhosts.
+## Setting up V-Host configs.
 
-Normally you would create your vhosts configs in `/etc/apache2/sites-available/` and then use the `a2ensite` command
+Normally you would create your configs in `/etc/apache2/sites-available/` and then use the `a2ensite` command
 to create symlinks to the sites-enabled folder when ready.
 
-But were just going to link my provided config from this repo and restart apache.
+But were just going to link my provided config from this repo and restart Apache.
 
-### Adding vhost config from this repo.
+### Adding V-Host config from this repo.
 
 Use my [dynamic localhost](dynamic-vhost.conf) config:
 
@@ -135,7 +135,7 @@ Verify the contents of the file are there via the new link.
 sudo cat /etc/apache2/sites-enabled/dynamic-vhost.conf
 ```
 
-### Restart apache
+### Restart Apache
 
 Enable the new config by restarting. Need to do this every time you change stuff.
 
@@ -143,21 +143,36 @@ Enable the new config by restarting. Need to do this every time you change stuff
 sudo service apache2 restart
 ```
 
-## The Dynamic vhost config.
-The dynamic localhost config will point any domain to a matching folder, ignoring www.
+## The Dynamic V-Host config.
+The dynamic localhost config will point any domain to a matching folder, ignoring WWW.
 
-- localhost points to /var/www/localhost/
-- www.localhost points to /var/www/localhost/
-- animals.localhost points to /var/www/animals.localhost/
-- some.really.long.domain.gov.edu.au to /var/www/some.really.long.domain.gov.edu.au/
+- localhost points to `/var/www/localhost/`
+- www.localhost points to `/var/www/localhost/`
+- animals.localhost points to `/var/www/animals.localhost/`
+- some.really.long.domain.gov.edu.au to `/var/www/some.really.long.domain.gov.edu.au/`
 
 Super simple.
 
 ## Changing the default port.
 You may decide to use a proxy manager in front of your web services and thus
-need to change the port for apache.
+need to change the port for Apache.
 
 ```shell
 sudo nano /etc/apache2/ports.conf
 ```
 Change the listen ports to something that won't clash with common ports for other systems.
+
+## Configure PHP for production.
+
+I have provided config file with my recommended settings for PHP in production.
+
+It can be automatically included by linking git to the `conf.d` folder.
+
+```shell
+sudo ln -s $(pwd)/php-produciton.ini /etc/php/8.3/apache2/conf.d/30-production.ini
+```
+
+And double-check the link works:
+```shell
+sudo cat /etc/php/8.3/apache2/conf.d/30-production.ini
+```

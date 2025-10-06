@@ -176,3 +176,30 @@ And double-check the link works:
 ```shell
 sudo cat /etc/php/8.3/apache2/conf.d/30-production.ini
 ```
+
+## Security
+
+### Recommended approach:
+If Apache is behind Cloudflare and Nginx Proxy Manager, you already have significant protection:
+1. **Cloudflare** handles DDoS and bot attacks
+2. **Nginx Proxy Manager** can implement rate limiting globally or per-host
+3. **Application-level** protection (track failed logins in your PHP code)
+
+Focus on rate limiting at the Nginx level and implementing login attempt tracking in your applications.
+
+### If you must secure Apache directly:
+Apache does not provide built-in protection against brute force attacks or rate limiting for login attempts.
+
+Available modules:
+- `mod_evasive` - Basic DoS/brute force protection (rate limits requests by IP)
+- `mod_security` - Web application firewall for detecting attack patterns
+- `fail2ban` - Monitors logs and blocks IPs after repeated failures
+
+Install with:
+```shell
+sudo apt install libapache2-mod-evasive libapache2-mod-security2 fail2ban
+sudo a2enmod evasive
+sudo a2enmod security2
+```
+
+Note: Adding Apache modules when behind Cloudflare/Nginx adds complexity with minimal benefit.

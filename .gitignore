@@ -1,0 +1,14 @@
+# IDE - JetBrains
+.idea/
+
+# IDE - VS Code
+.vscode/
+
+# Composer
+vendor/
+composer.lock
+
+# OS
+.DS_Store
+.Thumbs.db
+
